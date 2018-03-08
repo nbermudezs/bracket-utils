@@ -30,8 +30,30 @@ seed_vector = [[1,16,8,9,5,12,4,13,6,11,3,14,7,10,2,15,1,16,8,9,5,12,4,13,6,11,3
 				[1]*64, [1]*64]
 				
 
+print("Converting to TTT")
+print("-------------------------------------")
 for i in range(0, len(all_TTT_brackets)):
 	new_TTT = score.change_to_TTT(all_FFF_brackets[i], seed_vector, rounds_are_different=True)
+	if(new_TTT != all_TTT_brackets[i]):
+		print("Failure", 1985+i)
+	else:
+		print("Success!", 1985+i)
+
+print("")
+print("Converting from TTT")
+print("--------------------------------")
+for i in range(0, len(all_TTT_brackets)):
+	new_FFF = score.convertBracket(all_TTT_brackets[i], seed_vector, rounds_are_different=True, from_TTT=True)
+	if(new_FFF != all_FFF_brackets[i]):
+		print("Failure", 1985+i)
+	else:
+		print("Success!", 1985+i)
+		
+print("")
+print("Converting to TTT 2")
+print("--------------------------------")
+for i in range(0, len(all_TTT_brackets)):
+	new_TTT = score.convertBracket(all_FFF_brackets[i], seed_vector, rounds_are_different=True)
 	if(new_TTT != all_TTT_brackets[i]):
 		print("Failure", 1985+i)
 	else:

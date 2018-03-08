@@ -75,8 +75,10 @@ def scoreBracket(bracketVector, actualResultsVector, isPickFavorite = False):
 	
 # This Funciton changes a bracket that uses a
 # representation other than TTT into a TTT bracket.
-# It takes in a bracket of some form other than TTT
-# and a set of scores. The scores should be an array of
+# It can also change a bracket from TTT representation into
+# some other form if the from_TTT flag is set.
+# It takes in the bracket to be converted and a set of scores 
+# used for the non TTT bracket. The scores should be an array of
 # 64 ints representing the score of a given team.
 # If the score changes between rounds, then the 
 # rounds_are_different flag should be set, and the array that
@@ -87,7 +89,7 @@ def scoreBracket(bracketVector, actualResultsVector, isPickFavorite = False):
 # winning (unless the higher_score_win flag is set). 
 # In the case of a tie, we assume a 1 represents the top 
 # team winning.
-def change_to_TTT(bracket, scores, high_score_win=False, rounds_are_different=False):
+def convertBracket(bracket, scores, high_score_win=False, rounds_are_different=False, from_TTT=False):
 
 	new_bracket = [0]*63
 	current_game_indicies = [i for i in range(64)]	
@@ -118,20 +120,35 @@ def change_to_TTT(bracket, scores, high_score_win=False, rounds_are_different=Fa
 			if(round>3):
 				end_game = (6-round)
 			for game in range (0, end_game):
-				#Top team wins
+				#Top team wins/better score wins
 				if ((bracket[game+offset] and current_scores[current_game_indicies[score_index]] < current_scores[current_game_indicies[score_index + 1]] and not high_score_win) or
 						(bracket[game+offset] and current_scores[current_game_indicies[score_index]] > current_scores[current_game_indicies[score_index + 1]] and high_score_win) or
 						(not bracket[game+offset] and current_scores[current_game_indicies[score_index]] > current_scores[current_game_indicies[score_index+1]] and not high_score_win) or
 						(not bracket[game+offset] and current_scores[current_game_indicies[score_index]] < current_scores[current_game_indicies[score_index + 1]] and high_score_win) or
 						(bracket[game+offset] and current_scores[current_game_indicies[score_index]] == current_scores[current_game_indicies[score_index+1]])):
 					new_bracket[game+offset] = 1
-					next_game_indicies.append(current_game_indicies[score_index])
-				#otherwise bottom team wins
+					if(not from_TTT):
+						next_game_indicies.append(current_game_indicies[score_index])
+					elif( (high_score_win and current_scores[current_game_indicies[score_index]] >= current_scores[current_game_indicies[score_index + 1]]) or
+							(not high_score_win and current_scores[current_game_indicies[score_index]] <= current_scores[current_game_indicies[score_index + 1]])): 
+						next_game_indicies.append(current_game_indicies[score_index])
+					else:
+						next_game_indicies.append(current_game_indicies[score_index+1])
+				#otherwise bottom/lower score team wins
 				else:
 					new_bracket[game+offset] = 0
-					next_game_indicies.append(current_game_indicies[score_index+1])
-				
+					if (not from_TTT):
+						next_game_indicies.append(current_game_indicies[score_index+1])
+					elif( (high_score_win and current_scores[current_game_indicies[score_index]] >= current_scores[current_game_indicies[score_index + 1]]) or
+							(not high_score_win and current_scores[current_game_indicies[score_index]] <= current_scores[current_game_indicies[score_index + 1]])):
+						next_game_indicies.append(current_game_indicies[score_index+1])
+					else:
+						next_game_indicies.append(current_game_indicies[score_index])
 				score_index+=2
 		current_game_indicies = next_game_indicies
 		
 	return new_bracket
+	
+# wrapper function in case old code uses the "change_to_TTT" function instead of the renamed convertBracket function
+def change_to_TTT(bracket, scores, high_score_win=False, rounds_are_different=False):
+	return convertBracket(bracket, scores, high_score_win, rounds_are_different)
